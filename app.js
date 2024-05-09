@@ -27,11 +27,21 @@ app.get('/api/v1/tours', (req, res)=>{
 //responding to url parameters e.g. url-text.../:id/:x/:y 
 //we can make some parameters optional as /api/v1/tours/:id/:x?/:y
 app.get('/api/v1/tours/:id', (req,res)=>{
-    const requestedTour=tours.find(el=>el.id==req.params.id);
+    const id=req.params.id*1;
+
+    const tour=tours.find(el=>el.id===id);
+
+    if(!tour){
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Invalid ID'
+        });
+    };
+
     res.status(200).json({
         status:'success',
         data:{
-            tour: requestedTour
+            tour: tour
         }
     });
 });
@@ -51,6 +61,46 @@ app.post('/api/v1/tours', (req, res)=>{
                 tour: newTour
             }
         });
+    });
+});
+
+//POST request
+app.patch('/api/v1/tours/:id', (req,res) => {
+    const id=req.params.id*1;
+
+    const tour=tours.find(el=>el.id===id);
+
+    if(!tour){
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Invalid ID'
+        });
+    };
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            tour: '<Updated tour here...>'
+        }
+    });
+
+});
+
+app.delete('/api/v1/tours/:id', (req,res) => {
+    const id=req.params.id*1;
+
+    const tour=tours.find(el=>el.id===id);
+
+    if(!tour){
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Invalid ID'
+        });
+    };
+
+    res.status(204).json({
+        status: 'success',
+        data: null
     });
 });
 
