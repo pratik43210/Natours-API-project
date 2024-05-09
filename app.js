@@ -1,109 +1,33 @@
 const express = require('express');
 const fs = require( 'fs' );
+const morgan= require('morgan');
+
+const tourRouter=require('./routes/tourRoutes');
+const userRouter=require('./routes/userRoutes');
 
 const app =  express();
 
+/** Middleware */
+//use method adds middleware function to middleware stack
+app.use(morgan('dev'));
 app.use(express.json());
 
-// app.get('/', (req,res)=>{
-//     res
-//         .status(404)
-//         .json({message: 'Hello from the server side!', app:'Natours'});
-// });
-
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
-
-//we have formatted json response in JSend format
-app.get('/api/v1/tours', (req, res)=>{
-    res.status(200).json({
-        status:'success',
-        results: tours.length,
-        data: {
-            tours
-        }
-    });
+app.use((req,res,next) => {
+    console.log('Hello from the middleware');
+    //next method calls the next middleware function in the stack
+    next();
 });
 
-//responding to url parameters e.g. url-text.../:id/:x/:y 
-//we can make some parameters optional as /api/v1/tours/:id/:x?/:y
-app.get('/api/v1/tours/:id', (req,res)=>{
-    const id=req.params.id*1;
-
-    const tour=tours.find(el=>el.id===id);
-
-    if(!tour){
-        return res.status(404).json({
-            status: 'fail',
-            message: 'Invalid ID'
-        });
-    };
-
-    res.status(200).json({
-        status:'success',
-        data:{
-            tour: tour
-        }
-    });
+app.use((req,res,next)=>{
+    req.requestTime= new Date().toISOString();
+    next();
 });
 
-//express does not include body data in the request so we use middleware- app.use(express.json) in start of the file
-//it is called so because it stands between request and response
-app.post('/api/v1/tours', (req, res)=>{
-    // console.log(req.body);
-    const newId = tours[tours.length-1].id+1;
-    const newTour = Object.assign({ id: newId }, req.body);
-
-    tours.push(newTour);
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err=>{
-        res.status(201).json({
-            status:'success',
-            data:{
-                tour: newTour
-            }
-        });
-    });
-});
-
-//POST request
-app.patch('/api/v1/tours/:id', (req,res) => {
-    const id=req.params.id*1;
-
-    const tour=tours.find(el=>el.id===id);
-
-    if(!tour){
-        return res.status(404).json({
-            status: 'fail',
-            message: 'Invalid ID'
-        });
-    };
-
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour: '<Updated tour here...>'
-        }
-    });
-
-});
-
-app.delete('/api/v1/tours/:id', (req,res) => {
-    const id=req.params.id*1;
-
-    const tour=tours.find(el=>el.id===id);
-
-    if(!tour){
-        return res.status(404).json({
-            status: 'fail',
-            message: 'Invalid ID'
-        });
-    };
-
-    res.status(204).json({
-        status: 'success',
-        data: null
-    });
-});
-
+/** Routes */
+//Mounting the routers
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+/** Start server */
 const port = 3000;
 
 app.listen(port, ()=>{
