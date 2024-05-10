@@ -9,8 +9,13 @@ const app =  express();
 
 /** Middleware */
 //use method adds middleware function to middleware stack
-app.use(morgan('dev'));
+if(process.env.NODE_ENV==='development'){
+    app.use(morgan('dev'));
+}
 app.use(express.json());
+
+//serving static files
+app.use(express.static(`${__dirname}/public`));
 
 app.use((req,res,next) => {
     console.log('Hello from the middleware');
@@ -27,9 +32,5 @@ app.use((req,res,next)=>{
 //Mounting the routers
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
-/** Start server */
-const port = 3000;
 
-app.listen(port, ()=>{
-    console.log(`App running on port ${port}...`);
-});
+module.exports = app;
