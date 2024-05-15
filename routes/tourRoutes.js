@@ -9,12 +9,12 @@ const router=express.Router();
 router
     .route('/')
     .get(tourController.getAllTours)
-    .post(tourController.checkBody,tourController.createTour);//chaining middleware
+    .post(tourController.createTour);//chaining middleware
 
 router
     .route('/:id')
-    .get(tourController.checkID,tourController.getTour)
-    .patch(tourController.checkID,tourController.updateTour)
-    .delete(tourController.checkID,tourController.deleteTour);
+    .get(tourController.getTour)
+    .patch(tourController.updateTour)
+    .delete(tourController.deleteTour);
 
 module.exports = router;
